@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 导出的 PDF 不进仓库（md 才是源文件）
+*.pdf
+
+# 组内操作手册只在本地看，不推送
+组内须知.md
