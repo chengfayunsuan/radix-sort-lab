@@ -57,8 +57,27 @@ class StageView(tk.Canvas):
         动画时可以让数组用上一帧、桶用这一帧（或反过来），详见 app._fly_plan。
         """
         self.delete("all")
+        self._draw_panels()
         self.array.draw(self, arr_snap or snap, digits, hide=hide_array)
         self.bucket.draw(self, bkt_snap or snap, digits, hide=hide_bucket)
+
+    def _draw_panels(self):
+        """
+        给两块内容各垫一张硬边白卡——构成主义的" posters are panels" 语言。
+
+        只画背景、不碰任何坐标：数组层和桶层仍按原来的位置绘制，
+        所以飞行动画的起终点完全不受影响。
+
+        浅色版本：浅灰投影 + 1px 灰边 + 左上角小段主色条。
+        只做直角，不做红黑撞色。
+        """
+        for y1, y2 in ((6, 192), (200, 664)):
+            round_rect(self, 7, y1 + 3, 923, y2 + 3,
+                       fill=COLORS["shadow"], outline="")
+            round_rect(self, 4, y1, 920, y2,
+                       fill=COLORS["card"], outline=COLORS["border"], width=1)
+            round_rect(self, 4, y1, 56, y1 + 4,
+                       fill=COLORS["primary"], outline="")
 
     # ------------------------------------------------------------------
     # 飞行动画
@@ -112,10 +131,10 @@ class StageView(tk.Canvas):
         x1, y1 = cx - w / 2, cy - h / 2
         x2, y2 = cx + w / 2, cy + h / 2
 
-        # 阴影：Tk 的 Canvas 不支持半透明，用一层浅灰下移两像素近似
-        round_rect(self, x1, y1 + 3, x2, y2 + 3, r=8,
-                   fill="#DFE5EE", outline="", tags=FLY_TAG)
-        round_rect(self, x1, y1, x2, y2, r=8,
+        # 浅灰投影（右下挪 3px）
+        round_rect(self, x1 + 3, y1 + 3, x2 + 3, y2 + 3,
+                   fill=COLORS["shadow"], outline="", tags=FLY_TAG)
+        round_rect(self, x1, y1, x2, y2,
                    fill=COLORS["active_bg"], outline=COLORS["active_line"],
                    width=2, tags=FLY_TAG)
         draw_number(

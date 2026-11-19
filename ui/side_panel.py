@@ -71,13 +71,13 @@ class SidePanel(tk.Frame):
 
         box = tk.Frame(
             outer, bg=COLORS["badge_bg"],
-            highlightbackground=COLORS["border_dark"],
+            highlightbackground=COLORS["border"],
             highlightthickness=1,
         )
         box.pack(fill="x")
 
-        # 左侧强调竖条，把这张卡和下面几张区分开
-        tk.Frame(box, bg=COLORS["primary"], width=4).pack(side="left", fill="y")
+        # 左侧红色竖条，构成主义的红黑对比
+        tk.Frame(box, bg=COLORS["primary"], width=5).pack(side="left", fill="y")
 
         inner = tk.Frame(box, bg=COLORS["badge_bg"])
         inner.pack(side="left", fill="both", expand=True, padx=13, pady=(8, 10))
@@ -117,22 +117,21 @@ class SidePanel(tk.Frame):
         self.phase_label.pack(fill="x")
 
     def _draw_dots(self, done, current, total):
-        """画一排进度点：done 表示已完成的轮数，current 是当前轮（从 1 开始）。"""
+        """画一排进度方块：done 已完成轮数，current 当前轮（从 1 开始）。构成主义只用直角方块。"""
         self.dots.delete("all")
         x = 1
+        s = 12
         for i in range(total):
             if i + 1 == current:
-                color = COLORS["active_line"]
-                r = 5
+                fill, outline, w = COLORS["primary"], COLORS["border"], 2
             elif i + 1 <= done:
-                color = COLORS["primary"]
-                r = 4
+                fill, outline, w = COLORS["text"], COLORS["border"], 1
             else:
-                color = COLORS["border_dark"]
-                r = 4
-            cy = 5
-            self.dots.create_oval(x, cy - r, x + r * 2, cy + r, fill=color, outline="")
-            x += r * 2 + 7
+                fill, outline, w = COLORS["badge_bg"], COLORS["border"], 1
+            self.dots.create_rectangle(
+                x, 1, x + s, 1 + s, fill=fill, outline=outline, width=w,
+            )
+            x += s + 6
 
     # ------------------------------------------------------------------
     def _build_stats(self):

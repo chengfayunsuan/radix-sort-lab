@@ -116,7 +116,7 @@ radix-sort-lab/
 │   └── radix_engine.py                  排序核心：把整个过程展开成快照序列
 ├── ui/                                  界面层
 │   ├── __init__.py
-│   ├── theme.py                         配色、字体、圆角矩形、逐位数字绘制
+│   ├── theme.py                         配色、字体、直角矩形、逐位数字绘制
 │   ├── array_view.py                    数组图层（画上方卡片）
 │   ├── bucket_view.py                   桶图层（画下方十个桶）
 │   ├── stage_view.py                    舞台：把两个图层合到一张画布，并负责飞行动画

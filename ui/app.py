@@ -95,83 +95,95 @@ class RadixApp:
         self._build_status_bar()
 
     def _build_header(self):
-        header = tk.Frame(self.root, bg=COLORS["header"], height=68)
+        header = tk.Frame(self.root, bg=COLORS["header"], height=76)
         header.pack(fill="x")
         header.pack_propagate(False)
 
         tk.Frame(self.root, bg=COLORS["border"], height=1).pack(fill="x")
 
+        # ---- 标题块：左侧一条红色竖条 + 标题 + 副标题 ----
         left = tk.Frame(header, bg=COLORS["header"])
-        left.pack(side="left", padx=(22, 0), pady=14)
+        left.pack(side="left", padx=(20, 0), pady=16)
 
+        tk.Frame(left, bg=COLORS["primary"], width=5).pack(side="left", fill="y", padx=(0, 12))
+
+        titles = tk.Frame(left, bg=COLORS["header"])
+        titles.pack(side="left")
         tk.Label(
-            left, text="基数排序可视化", font=self.fonts["title"],
+            titles, text="基数排序可视化", font=self.fonts["title"],
             fg=COLORS["text"], bg=COLORS["header"], anchor="w",
         ).pack(anchor="w")
         tk.Label(
-            left, text="LSD Radix Sort · 从个位到高位，每一轮分配后收集",
+            titles, text="LSD RADIX SORT  ·  从个位到高位，逐轮分配与收集",
             font=self.fonts["small"], fg=COLORS["text_dim"],
             bg=COLORS["header"], anchor="w",
         ).pack(anchor="w")
 
-        right = tk.Frame(header, bg=COLORS["header"])
-        right.pack(side="right", padx=(0, 22), pady=16)
+        # ---- 工具栏卡片：白底描边，内部按用途分三组 ----
+        tool = tk.Frame(
+            header, bg=COLORS["card"],
+            highlightbackground=COLORS["border_dark"], highlightthickness=1, bd=0,
+        )
+        tool.pack(side="right", padx=(0, 20), pady=15)
+        inner = tk.Frame(tool, bg=COLORS["card"])
+        inner.pack(padx=10, pady=6)
 
-        # ---- 数据量输入 ----
+        # 组 1：数据
+        g_data = tk.Frame(inner, bg=COLORS["card"])
+        g_data.pack(side="left")
         tk.Label(
-            right, text="数据个数", font=self.fonts["small"],
-            fg=COLORS["text_sub"], bg=COLORS["header"],
-        ).pack(side="left", padx=(0, 6))
-
+            g_data, text="个数", font=self.fonts["small"],
+            fg=COLORS["text_sub"], bg=COLORS["card"],
+        ).pack(side="left", padx=(0, 5))
         self.n_entry = tk.Entry(
-            right, width=3, font=self.fonts["body"], justify="center",
+            g_data, width=3, font=self.fonts["body"], justify="center",
             relief="solid", bd=1, bg=COLORS["card"], fg=COLORS["text"],
         )
         self.n_entry.insert(0, str(DEFAULT_N))
-        self.n_entry.pack(side="left", padx=(0, 8), ipady=3)
+        self.n_entry.pack(side="left", padx=(0, 6), ipady=3)
         self.n_entry.bind("<Return>", lambda e: self.new_data())
+        self._button(g_data, "生成数据", self.new_data, primary=True).pack(side="left")
 
-        self._button(right, "生成数据", self.new_data, primary=True).pack(side="left", padx=(0, 12))
+        self._divider(inner)
 
-        # ---- 播放控制 ----
-        self.btn_reset = self._button(right, "重置", self.reset)
-        self.btn_reset.pack(side="left", padx=2)
+        # 组 2：播放控制
+        g_play = tk.Frame(inner, bg=COLORS["card"])
+        g_play.pack(side="left")
+        self.btn_reset = self._button(g_play, "重置", self.reset)
+        self.btn_reset.pack(side="left", padx=1)
+        self.btn_prev = self._button(g_play, "上一步", self.step_back)
+        self.btn_prev.pack(side="left", padx=1)
+        self.btn_next = self._button(g_play, "单步", self.step_forward, primary=True)
+        self.btn_next.pack(side="left", padx=1)
+        self.btn_play = self._button(g_play, "自动播放", self.toggle_play)
+        self.btn_play.pack(side="left", padx=1)
+        self.btn_round = self._button(g_play, "下一轮", self.jump_next_round)
+        self.btn_round.pack(side="left", padx=1)
 
-        self.btn_prev = self._button(right, "上一步", self.step_back)
-        self.btn_prev.pack(side="left", padx=2)
+        self._divider(inner)
 
-        self.btn_next = self._button(right, "单步", self.step_forward, primary=True)
-        self.btn_next.pack(side="left", padx=2)
-
-        self.btn_play = self._button(right, "自动播放", self.toggle_play)
-        self.btn_play.pack(side="left", padx=2)
-
-        self.btn_round = self._button(right, "下一轮", self.jump_next_round)
-        self.btn_round.pack(side="left", padx=(2, 10))
-
-        # ---- 速度 ----
+        # 组 3：速度
+        g_speed = tk.Frame(inner, bg=COLORS["card"])
+        g_speed.pack(side="left")
         tk.Label(
-            right, text="速度", font=self.fonts["small"],
-            fg=COLORS["text_sub"], bg=COLORS["header"],
+            g_speed, text="速度", font=self.fonts["small"],
+            fg=COLORS["text_sub"], bg=COLORS["card"],
         ).pack(side="left", padx=(0, 5))
-
-        # 滑块外面套一层带描边的 Frame：Scale 自己的 highlight 只在获得焦点时显示，
-        # 平时是看不见的，加一圈边框才能让它在白底顶栏上有个明确的边界。
-        speed_box = tk.Frame(
-            right, bg=COLORS["card"],
-            highlightbackground=COLORS["border_dark"], highlightthickness=1, bd=0,
-        )
-        speed_box.pack(side="left")
-
         self.speed = tk.Scale(
-            speed_box, from_=1, to=10, orient="horizontal", length=68,
+            g_speed, from_=1, to=10, orient="horizontal", length=64,
             showvalue=False, bg=COLORS["card"], highlightthickness=0,
             troughcolor=COLORS["border"], sliderrelief="flat", bd=0,
-            activebackground=COLORS["primary"], sliderlength=15, width=9,
+            activebackground=COLORS["primary"], sliderlength=14, width=9,
             borderwidth=0,
         )
         self.speed.set(6)
-        self.speed.pack(padx=3, pady=2)
+        self.speed.pack(side="left")
+
+    def _divider(self, parent):
+        """工具栏分组之间的一条竖直分隔线。"""
+        tk.Frame(parent, bg=COLORS["border"], width=1).pack(
+            side="left", fill="y", padx=7, pady=2
+        )
 
     def _button(self, parent, text, command, primary=False):
         """统一样式的扁平按钮。primary 为真时用实心主色。"""
@@ -188,11 +200,9 @@ class RadixApp:
             bg=bg, fg=fg, activebackground=active_bg,
             activeforeground=fg,
             disabledforeground=disabled_fg,
-            relief="flat", bd=0, padx=9, pady=5,
+            relief="solid", bd=1, padx=8, pady=4,
             cursor="hand2",
-            highlightthickness=1,
-            highlightbackground=COLORS["border"] if not primary else bg,
-            highlightcolor=COLORS["border"] if not primary else bg,
+            highlightthickness=0,
         )
 
     def _build_status_bar(self):

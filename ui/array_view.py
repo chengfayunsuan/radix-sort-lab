@@ -27,8 +27,8 @@ from .theme import COLORS, round_rect, draw_number
 STAGE_W = 924
 
 LAYER_H = 190             # 本层占用的高度
-TITLE_Y = 8               # 小标题基线
-TOP_PAD = 34              # 第一行卡片的顶部
+TITLE_Y = 17              # 小标题基线
+TOP_PAD = 38              # 第一行卡片的顶部
 
 PER_ROW = 10              # 每行最多放 10 个卡片
 CARD_W = 80
@@ -68,9 +68,15 @@ class ArrayLayer:
     # ------------------------------------------------------------------
     def draw(self, canvas, snap, digits, hide=()):
         """把整个数组区画到 canvas 上。hide 里的下标不画（动画时让出位置）。"""
+        # 分区头：一小段主色竖条 + 标题
+        canvas.create_rectangle(
+            20, self.y0 + 14, 24, self.y0 + 26,
+            fill=COLORS["primary"], outline="",
+        )
         canvas.create_text(
-            2, self.y0 + TITLE_Y, text="① 当前数组（灰色高位为补出来的前导零）",
-            anchor="nw", font=self.fonts["small"], fill=COLORS["text_dim"],
+            32, self.y0 + TITLE_Y,
+            text="当前数组　灰色高位为补出来的前导零",
+            anchor="w", font=self.fonts["small"], fill=COLORS["text_sub"],
         )
 
         arr = snap.array
@@ -104,9 +110,9 @@ class ArrayLayer:
         """画一张数字卡片。value 为 None 时表示收集阶段尚未填入的空位。"""
         if value is None:
             round_rect(
-                canvas, x, y, x + CARD_W, y + CARD_H, r=8,
+                canvas, x, y, x + CARD_W, y + CARD_H,
                 fill=COLORS["empty"], outline=COLORS["border_dark"],
-                width=1, dash=(4, 4),
+                width=1, dash=(5, 4),
             )
             canvas.create_text(
                 x + CARD_W / 2, y + CARD_H / 2,
@@ -116,12 +122,12 @@ class ArrayLayer:
 
         if active:
             round_rect(
-                canvas, x, y, x + CARD_W, y + CARD_H, r=8,
+                canvas, x, y, x + CARD_W, y + CARD_H,
                 fill=COLORS["active_bg"], outline=COLORS["active_line"], width=2,
             )
         else:
             round_rect(
-                canvas, x, y, x + CARD_W, y + CARD_H, r=8,
+                canvas, x, y, x + CARD_W, y + CARD_H,
                 fill=COLORS["card"], outline=COLORS["border"], width=1,
             )
 

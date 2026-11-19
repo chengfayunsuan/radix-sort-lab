@@ -35,7 +35,7 @@ ITEM_GAP = 2
 ITEM_TOP = TOP + 10
 MAX_ITEMS = 12          # 桶内最多画 12 个卡片，超出时折叠成 "+N"
 
-TITLE_Y = 8
+TITLE_Y = 17
 
 
 class BucketLayer:
@@ -72,9 +72,13 @@ class BucketLayer:
     # ------------------------------------------------------------------
     def draw(self, canvas, snap, digits, hide=()):
         """hide 是 [(桶号, 第几张), ...]，动画时把这些卡片藏起来让出位置。"""
+        canvas.create_rectangle(
+            20, self.y0 + 14, 24, self.y0 + 26,
+            fill=COLORS["primary"], outline="",
+        )
         canvas.create_text(
-            2, self.y0 + TITLE_Y, text="② 十个桶（按当前数位的数字落桶）",
-            anchor="nw", font=self.fonts["small"], fill=COLORS["text_dim"],
+            32, self.y0 + TITLE_Y, text="十个桶　按当前数位的数字落桶",
+            anchor="w", font=self.fonts["small"], fill=COLORS["text_sub"],
         )
 
         for b in range(BUCKET_COUNT):
@@ -91,32 +95,26 @@ class BucketLayer:
         wall_color = COLORS["active_line"] if is_active else COLORS["bucket_line"]
         wall_width = 2 if is_active else 1
 
-        # 先铺一层极浅的底色，让桶看起来是个实体容器，而不是几根悬空的线
-        canvas.create_rectangle(
-            x, y_top, x + BUCKET_W, y_bottom,
-            fill=COLORS["bucket_bg"], outline="",
+        # 圆角容器：和数组卡、面板卡用同一套圆角语言。
+        # 坐标和原来的 U 形完全一致，所以飞行动画的落点不受影响。
+        round_rect(
+            canvas, x, y_top, x + BUCKET_W, y_bottom, r=10,
+            fill=COLORS["bucket_bg"], outline=wall_color, width=wall_width,
         )
         # 桶口的一条短横线，暗示"数是从这里落进去的"
         canvas.create_line(
-            x - 3, y_top, x + BUCKET_W + 3, y_top,
+            x + 8, y_top, x + BUCKET_W - 8, y_top,
             fill=wall_color, width=wall_width,
         )
-
-        # U 形桶壁
-        canvas.create_line(x, y_top, x, y_bottom, fill=wall_color, width=wall_width)
-        canvas.create_line(x + BUCKET_W, y_top, x + BUCKET_W, y_bottom,
-                           fill=wall_color, width=wall_width)
-        canvas.create_line(x, y_bottom, x + BUCKET_W, y_bottom,
-                           fill=wall_color, width=wall_width)
 
         # 桶号
         ly = self.y0 + LABEL_Y
         cx = x + BUCKET_W / 2
-        canvas.create_oval(
+        canvas.create_rectangle(
             cx - 11, ly - 11, cx + 11, ly + 11,
             fill=COLORS["active_bg"] if is_active else COLORS["bg"],
-            outline=COLORS["active_line"] if is_active else COLORS["border_dark"],
-            width=1,
+            outline=COLORS["active_line"] if is_active else COLORS["border"],
+            width=2,
         )
         canvas.create_text(
             cx, ly, text=str(index), font=self.fonts["bucket"],
@@ -160,12 +158,12 @@ class BucketLayer:
 
         if highlight:
             round_rect(
-                canvas, x, y, x + ITEM_W, y + ITEM_H, r=5,
+                canvas, x, y, x + ITEM_W, y + ITEM_H,
                 fill=COLORS["active_bg"], outline=COLORS["active_line"], width=2,
             )
         else:
             round_rect(
-                canvas, x, y, x + ITEM_W, y + ITEM_H, r=5,
+                canvas, x, y, x + ITEM_W, y + ITEM_H,
                 fill=COLORS["item_bg"], outline=COLORS["item_line"], width=1,
             )
 
