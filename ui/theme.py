@@ -116,11 +116,11 @@ def draw_number(canvas, cx, cy, value, digits, font, main,
             )
             color = COLORS["digit_hot"]
         elif mark:
-            color = COLORS["digit_warm"]
-            canvas.create_line(
-                cur + 1, cy + descent, cur + widths[k] - 1, cy + descent,
-                fill=COLORS["digit_warm"], width=2, tags=tags,
-            )
+            # 以前这里在数字底下补一条横线。7 的字形是"顶横 + 斜竖"，
+            # 底下本来没有横，结果被这条线补上一道底横，放大后整个 7
+            # 看着就像字母 Z，明明是数字却认不出来。
+            # 现在只在当前位换个醒目色，字形一动不动，是几就是几。
+            color = COLORS["digit_hot"]
         elif k < leading:
             color = "#D9A99F" if strong else COLORS["text_dim"]
         else:

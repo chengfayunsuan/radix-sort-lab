@@ -56,6 +56,7 @@ class RadixApp:
         self.digits = 4
         self.playing = False
         self.animating = False
+        self._anim_target: int | None = None   # 正在飞的那一帧的目标下标
         self.logged: set[int] = set()
         self._tick_job = None
 
@@ -171,9 +172,9 @@ class RadixApp:
         ).pack(side="left", padx=(0, 5))
         self.speed = tk.Scale(
             g_speed, from_=1, to=10, orient="horizontal", length=64,
-            showvalue=False, bg=COLORS["card"], highlightthickness=0,
+            showvalue=False, bg=COLORS["primary"], highlightthickness=0,
             troughcolor=COLORS["border"], sliderrelief="flat", bd=0,
-            activebackground=COLORS["primary"], sliderlength=14, width=9,
+            activebackground=COLORS["primary_dk"], sliderlength=16, width=9,
             borderwidth=0,
         )
         self.speed.set(6)
@@ -267,13 +268,32 @@ class RadixApp:
         self.render()
 
     def step_forward(self):
-        if not self.engine or self.animating:
+        if not self.engine:
             return
+        # 连点不等动画：上一张还在飞就把它瞬间落定，立刻推进下一张，
+        # 这样"单步"可以一路快点下去，不会被动画时长卡住。
+        if self.animating:
+            self._settle_animation()
         last = self.engine.stats.total_steps - 1
         if self.index >= last:
             self._stop_play()
             return
         self._advance(self.index + 1)
+
+    def _settle_animation(self):
+        """把正在飞的动画立刻收尾到目标帧，不播放剩余飞行过程。"""
+        if not self.animating:
+            return
+        target = self._anim_target
+        self.stage.cancel_fly()
+        self.animating = False
+        self._anim_target = None
+        if target is not None:
+            self.index = target
+        self.render()
+        # 自动播放时收尾后要接着排下一步，否则会停在半路
+        if self.playing:
+            self._schedule_next()
 
     def step_back(self):
         if not self.engine:
@@ -281,6 +301,7 @@ class RadixApp:
         self._stop_play()
         self.stage.cancel_fly()
         self.animating = False
+        self._anim_target = None
         if self.index > 0:
             self.index -= 1
             self.render()
@@ -292,6 +313,7 @@ class RadixApp:
         self._stop_play()
         self.stage.cancel_fly()
         self.animating = False
+        self._anim_target = None
         for end_idx in self.engine.round_end_indices():
             if end_idx > self.index:
                 self.index = end_idx
@@ -326,6 +348,7 @@ class RadixApp:
         self._stop_play()
         self.stage.cancel_fly()
         self.animating = False
+        self._anim_target = None
 
     # ---- 速度换算 ----------------------------------------------------
     def _interval_ms(self) -> int:
@@ -379,6 +402,7 @@ class RadixApp:
         )
 
         self.animating = True
+        self._anim_target = target
         nxt = self.engine.get(target)
         self.stage.fly(
             p0, p1, nxt.active_value, self.digits,
@@ -430,6 +454,7 @@ class RadixApp:
 
     def _land(self, target, on_done):
         self.animating = False
+        self._anim_target = None
         self.index = target
         self.render()
         if on_done:

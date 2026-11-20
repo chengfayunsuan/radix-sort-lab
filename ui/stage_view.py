@@ -134,9 +134,11 @@ class StageView(tk.Canvas):
         # 浅灰投影（右下挪 3px）
         round_rect(self, x1 + 3, y1 + 3, x2 + 3, y2 + 3,
                    fill=COLORS["shadow"], outline="", tags=FLY_TAG)
+        # 飞行中的卡片保持普通卡片的白底墨边，不再套浅红框。
+        # 浅红框只在落定后的 active 卡片上出现，用来区分"正在拿"和"已落位"。
         round_rect(self, x1, y1, x2, y2,
-                   fill=COLORS["active_bg"], outline=COLORS["active_line"],
-                   width=2, tags=FLY_TAG)
+                   fill=COLORS["card"], outline=COLORS["border"],
+                   width=1, tags=FLY_TAG)
         draw_number(
             self, cx, cy - 1, value, digits,
             font=self.fonts["num_md"],
